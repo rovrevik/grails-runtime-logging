@@ -1,5 +1,4 @@
 class RuntimeLoggingGrailsPlugin {
-
 	def version = '0.4'
 	def grailsVersion = '1.3 > *'
 	def title = 'Grails Runtime Logging Plugin'
@@ -9,6 +8,6 @@ class RuntimeLoggingGrailsPlugin {
 	def documentation = 'http://grails.org/plugin/runtime-logging'
 
 	def license = 'APACHE'
-	def issueManagement = [system: 'JIRA', url: 'https://github.com/tombdean/grails-runtime-logging/issues']
-	def scm = [url: 'https://github.com/tombdean/grails-runtime-logging']
+	def issueManagement = [system: 'JIRA', url: 'https://github.com/rovrevik/grails-runtime-logging/issues']
+	def scm = [url: 'https://github.com/rovrevik/grails-runtime-logging']
 }
