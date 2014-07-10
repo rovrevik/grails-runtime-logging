@@ -2,8 +2,14 @@ package grails.plugin.runtimelogging
 
 import grails.util.GrailsUtil
 
-import org.apache.log4j.Level
-import org.apache.log4j.Logger
+//import ch.qos.logback.classic.Logger
+
+import ch.qos.logback.classic.Level
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory;
+
+//import org.apache.log4j.Logger
+//import org.apache.log4j.Level
 import org.codehaus.groovy.grails.commons.GrailsClass
 
 /**
@@ -70,11 +76,10 @@ class RuntimeLoggingController {
 
 	// Sets the log level based on parameter values
 	def setLogLevel = {
-
 		String loggerName = params.logger
-		Level level = Level.toLevel(params.level)
+		def level = getLevel(params.level)
 
-		Logger logger = loggerName ? Logger.getLogger(loggerName) : Logger.getRootLogger()
+		def logger = loggerName ? getLogger(loggerName) : getRootLogger()
 		logger.level = level
 
 		log.info "Logger $loggerName set to level $level"
@@ -93,6 +98,7 @@ class RuntimeLoggingController {
 
 	private void addCurrentLevelToLoggerMapList(List loggerMapList) {
 		loggerMapList.each {
+//TODO
 			it.name = "${it.name} - ${Logger.getLogger(it.logger).getEffectiveLevel()}"
 		}
 	}
@@ -130,4 +136,16 @@ class RuntimeLoggingController {
 		}
 		return logMapList
 	}
+
+    def getLevel(level) {
+        Level.toLevel(level)
+    }
+
+    def getRootLogger() {
+        LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
+    }
+
+    def getLogger(loggerName) {
+        LoggerFactory.getLogger(loggerName)
+    }
 }
