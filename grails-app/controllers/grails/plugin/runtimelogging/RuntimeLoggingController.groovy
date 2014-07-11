@@ -2,14 +2,14 @@ package grails.plugin.runtimelogging
 
 import grails.util.GrailsUtil
 
+//import ch.qos.logback.classic.Level
 //import ch.qos.logback.classic.Logger
 
-import ch.qos.logback.classic.Level
-import org.slf4j.Logger
+//import org.apache.log4j.Level
+//import org.apache.log4j.Logger
+
 import org.slf4j.LoggerFactory;
 
-//import org.apache.log4j.Logger
-//import org.apache.log4j.Level
 import org.codehaus.groovy.grails.commons.GrailsClass
 
 /**
@@ -76,11 +76,9 @@ class RuntimeLoggingController {
 
 	// Sets the log level based on parameter values
 	def setLogLevel = {
-		String loggerName = params.logger
-		def level = getLevel(params.level)
-
-		def logger = loggerName ? getLogger(loggerName) : getRootLogger()
-		logger.level = level
+        def names = setLoggerLevel(params.logger, params.level)
+        def loggerName = names.logger
+        def level = names.level
 
 		log.info "Logger $loggerName set to level $level"
 
@@ -98,8 +96,7 @@ class RuntimeLoggingController {
 
 	private void addCurrentLevelToLoggerMapList(List loggerMapList) {
 		loggerMapList.each {
-//TODO
-			it.name = "${it.name} - ${Logger.getLogger(it.logger).getEffectiveLevel()}"
+			it.name = "${it.name} - ${getEffectiveLevel(it.logger)}"
 		}
 	}
 
@@ -137,15 +134,29 @@ class RuntimeLoggingController {
 		return logMapList
 	}
 
-    def getLevel(level) {
-        Level.toLevel(level)
+    def setLoggerLevel(String loggerName, String levelName) {
+        def level = getLevel(levelName)
+
+        //def loggerClass = Class.forName('ch.qos.logback.classic.Logger')
+        //def logger = loggerName ? LoggerFactory.getLogger(loggerName) : LoggerFactory.getLogger(loggerClass.ROOT_LOGGER_NAME)
+
+        def loggerClass = Class.forName('org.apache.log4j.Logger')
+        def logger = loggerName ? loggerClass.getLogger(loggerName) : loggerClass.getRootLogger()
+
+        logger.level = level
+        return [logger: loggerName, level: level]
     }
 
-    def getRootLogger() {
-        LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
+    String getEffectiveLevel(String logger) {
+        //def loggerClass = Class.forName('ch.qos.logback.classic.Logger')
+        def loggerClass = Class.forName('org.apache.log4j.Logger')
+        loggerClass.getLogger(logger).getEffectiveLevel()
     }
 
-    def getLogger(loggerName) {
-        LoggerFactory.getLogger(loggerName)
+    //TODO these can be inlined?
+    def getLevel(String level) {
+        //def levelClass = Class.forName('ch.qos.logback.classic.Level')
+        def levelClass = Class.forName('org.apache.log4j.Level')
+        levelClass.toLevel(level)
     }
 }
