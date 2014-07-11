@@ -135,7 +135,9 @@ class RuntimeLoggingController {
 	}
 
     def setLoggerLevel(String loggerName, String levelName) {
-        def level = getLevel(levelName)
+        //def levelClass = Class.forName('ch.qos.logback.classic.Level')
+        def levelClass = Class.forName('org.apache.log4j.Level')
+        def level = levelClass.toLevel(levelName)
 
         //def loggerClass = Class.forName('ch.qos.logback.classic.Logger')
         //def logger = loggerName ? LoggerFactory.getLogger(loggerName) : LoggerFactory.getLogger(loggerClass.ROOT_LOGGER_NAME)
@@ -151,12 +153,5 @@ class RuntimeLoggingController {
         //def loggerClass = Class.forName('ch.qos.logback.classic.Logger')
         def loggerClass = Class.forName('org.apache.log4j.Logger')
         loggerClass.getLogger(logger).getEffectiveLevel()
-    }
-
-    //TODO these can be inlined?
-    def getLevel(String level) {
-        //def levelClass = Class.forName('ch.qos.logback.classic.Level')
-        def levelClass = Class.forName('org.apache.log4j.Level')
-        levelClass.toLevel(level)
     }
 }
