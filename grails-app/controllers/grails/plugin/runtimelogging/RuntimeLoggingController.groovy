@@ -1,7 +1,6 @@
 package grails.plugin.runtimelogging
 
 import grails.util.GrailsUtil
-import org.slf4j.LoggerFactory;
 import org.codehaus.groovy.grails.commons.GrailsClass
 
 /**
@@ -39,6 +38,8 @@ class RuntimeLoggingController {
 		[name: 'Hibernate', logger: 'org.hibernate']
 	]
 
+    def logAdapterService
+
 	// By default render the standard "chooser" view
 	def index = {
 		def domainLoggers = buildArtefactLoggerMapList("Domain")
@@ -68,7 +69,7 @@ class RuntimeLoggingController {
 
 	// Sets the log level based on parameter values
 	def setLogLevel = {
-        def names = setLoggerLevel(params.logger, params.level)
+        def names = logAdapterService.setLoggerLevel(params.logger, params.level)
         def loggerName = names.logger
         def level = names.level
 
@@ -88,7 +89,7 @@ class RuntimeLoggingController {
 
 	private void addCurrentLevelToLoggerMapList(List loggerMapList) {
 		loggerMapList.each {
-			it.name = "${it.name} - ${getEffectiveLevel(it.logger)}"
+			it.name = "${it.name} - ${logAdapterService.getEffectiveLevel(it.logger)}"
 		}
 	}
 
@@ -125,47 +126,4 @@ class RuntimeLoggingController {
 		}
 		return logMapList
 	}
-
-    def setLoggerLevel(String loggerName, String levelName) {
-        def level
-        def logger
-
-        withLoggerClass({
-            logger = loggerName ? it.getLogger(loggerName) : it.getRootLogger()
-            level = Class.forName('org.apache.log4j.Level').toLevel(levelName)
-            logger.level = level
-
-        }, {
-            logger = loggerName ? LoggerFactory.getLogger(loggerName) : LoggerFactory.getLogger(it.ROOT_LOGGER_NAME)
-            level = Class.forName('ch.qos.logback.classic.Level').toLevel(levelName)
-            logger.level = level
-        })
-
-        return [logger: loggerName, level: level]
-    }
-
-    String getEffectiveLevel(String loggerName) {
-        withLoggerClass({
-            it.getLogger(loggerName).getEffectiveLevel()
-        }, {
-            LoggerFactory.getLogger(loggerName).getEffectiveLevel()
-        })
-    }
-
-    def withLoggerClass(log4jClosure, logBackClosure) {
-        def loggerClass, loggerClosure;
-        try {
-            loggerClass = Class.forName('org.apache.log4j.Logger')
-            loggerClosure = log4jClosure
-        }
-        catch (ClassNotFoundException e1) {
-            try {
-                loggerClass = Class.forName('ch.qos.logback.classic.Logger')
-                loggerClosure = logBackClosure
-            }
-            catch (e2) { /** yep... just ignore it **/}
-        }
-
-        loggerClosure(loggerClass)
-    }
 }
