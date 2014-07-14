@@ -1,6 +1,7 @@
 package grails.plugin.runtimelogging
 
 import org.slf4j.LoggerFactory
+import org.slf4j.Logger
 
 /**
  * All logging implementation stuff should go in this service or, at least, NOT in the controller.
@@ -21,7 +22,7 @@ class LogAdapterService {
             logger.level = level
 
         }, {
-            logger = loggerName ? LoggerFactory.getLogger(loggerName) : LoggerFactory.getLogger(it.ROOT_LOGGER_NAME)
+            logger = loggerName ? LoggerFactory.getLogger(loggerName) : LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
             level = Class.forName('ch.qos.logback.classic.Level').toLevel(levelName)
             logger.level = level
         })
