@@ -11,19 +11,21 @@ import org.slf4j.Logger
 
 class LogAdapterService {
     static transactional = false
+    def loggingFramwork
+    def loggingClasses = [:]
 
     def setLoggerLevel(String loggerName, String levelName) {
         def level
         def logger
 
         withLoggerClass({
-            logger = loggerName ? it.getLogger(loggerName) : it.getRootLogger()
-            level = Class.forName('org.apache.log4j.Level').toLevel(levelName)
+            logger = loggerName ? loggingClasses.logger.getLogger(loggerName) : loggingClasses.logger.getRootLogger()
+            level = loggingClasses.level.toLevel(levelName)
             logger.level = level
 
         }, {
             logger = loggerName ? LoggerFactory.getLogger(loggerName) : LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
-            level = Class.forName('ch.qos.logback.classic.Level').toLevel(levelName)
+            level = loggingClasses.level.toLevel(levelName)
             logger.level = level
         })
 
@@ -32,25 +34,18 @@ class LogAdapterService {
 
     String getEffectiveLevel(String loggerName) {
         withLoggerClass({
-            it.getLogger(loggerName).getEffectiveLevel()
+            loggingClasses.logger.getLogger(loggerName).getEffectiveLevel()
         }, {
             LoggerFactory.getLogger(loggerName).getEffectiveLevel()
         })
     }
 
     def withLoggerClass(log4jClosure, logBackClosure) {
-        def loggerClass, loggerClosure;
-        try {
-            loggerClass = Class.forName('org.apache.log4j.Logger')
-            loggerClosure = log4jClosure
+        switch (loggingFramwork) {
+            case LoggingFramework.LOG4J:
+                log4jClosure()
+            case LoggingFramework.LOGBACK:
+                logBackClosure()
         }
-        catch (ClassNotFoundException e1) {
-            try {
-                loggerClass = Class.forName('ch.qos.logback.classic.Logger')
-                loggerClosure = logBackClosure
-            }
-            catch (e2) { /** yep... just ignore it **/}
-        }
-
-        loggerClosure(loggerClass)
-    }}
+    }
+}

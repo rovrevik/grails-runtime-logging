@@ -1,3 +1,5 @@
+import grails.plugin.runtimelogging.LoggingFramework
+
 class RuntimeLoggingGrailsPlugin {
     // the plugin version
     def version = "0.4.1-SNAPSHOT"
@@ -50,6 +52,35 @@ Allows you to change the logging characteristics (e.g. Level) for common parts o
 
     def doWithApplicationContext = { applicationContext ->
         // TODO Implement post initialization spring config (optional)
+        def bean = applicationContext.getBean('logAdapterService')
+        String loggingFrameworkName = application.config.grails.plugins.runtimelogging.loggingFramework ?: null
+
+        if (!bean) {
+            log.error('Could not retrieve logAdapterService bean.')
+        }
+        else if (!loggingFrameworkName) {
+            log.error('Could not retrieve logging framework setting. (assuming Log4j)')
+            bean.loggingFramwork = LoggingFramework.LOG4J
+        }
+        else {
+            try {
+                bean.loggingFramwork = LoggingFramework.valueOf(loggingFrameworkName)
+            }
+            catch (e) {
+                log.error('logging framework not set. (assuming Log4j)', e)
+                bean.loggingFramwork = LoggingFramework.LOG4J
+            }
+        }
+
+        if (bean) {
+            try {
+                bean.loggingClasses.logger = Class.forName(bean.loggingFramwork.loggingClassNames.logger)
+                bean.loggingClasses.level = Class.forName(bean.loggingFramwork.loggingClassNames.level)
+            }
+            catch (e) {
+                log.error("Could not load logging class(es) ${bean.loggingFramwork.loggingClassNames} message: ${e.message}")
+            }
+        }
     }
 
     def onChange = { event ->
