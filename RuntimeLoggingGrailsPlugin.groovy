@@ -1,5 +1,3 @@
-import grails.plugin.runtimelogging.LoggingFramework
-
 class RuntimeLoggingGrailsPlugin {
     // the plugin version
     def version = "0.4.1-SNAPSHOT"
@@ -60,15 +58,15 @@ Allows you to change the logging characteristics (e.g. Level) for common parts o
         }
         else if (!loggingFrameworkName) {
             log.error('Could not retrieve logging framework setting. (assuming Log4j)')
-            bean.loggingFramwork = LoggingFramework.LOG4J
+            bean.loggingFramwork = grails.plugin.runtimelogging.LoggingFramework.LoggingFramework.LOG4J
         }
         else {
             try {
-                bean.loggingFramwork = LoggingFramework.valueOf(loggingFrameworkName)
+                bean.loggingFramwork = grails.plugin.runtimelogging.LoggingFramework.LoggingFramework.valueOf(loggingFrameworkName)
             }
             catch (e) {
                 log.error('logging framework not set. (assuming Log4j)', e)
-                bean.loggingFramwork = LoggingFramework.LOG4J
+                bean.loggingFramwork = grails.plugin.runtimelogging.LoggingFramework.LoggingFramework.LOG4J
             }
         }
 
