@@ -44,8 +44,10 @@ class LogAdapterService {
         switch (loggingFramwork) {
             case LoggingFramework.LOG4J:
                 log4jClosure()
+                break
             case LoggingFramework.LOGBACK:
                 logBackClosure()
+                break
         }
     }
 }
