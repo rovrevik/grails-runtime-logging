@@ -1,9 +1,6 @@
 package grails.plugin.runtimelogging
 
 import grails.util.GrailsUtil
-
-import org.apache.log4j.Level
-import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsClass
 
 /**
@@ -41,6 +38,8 @@ class RuntimeLoggingController {
 		[name: 'Hibernate', logger: 'org.hibernate']
 	]
 
+    def logAdapterService
+
 	// By default render the standard "chooser" view
 	def index = {
 		def domainLoggers = buildArtefactLoggerMapList("Domain")
@@ -70,12 +69,9 @@ class RuntimeLoggingController {
 
 	// Sets the log level based on parameter values
 	def setLogLevel = {
-
-		String loggerName = params.logger
-		Level level = Level.toLevel(params.level)
-
-		Logger logger = loggerName ? Logger.getLogger(loggerName) : Logger.getRootLogger()
-		logger.level = level
+        def names = logAdapterService.setLoggerLevel(params.logger, params.level)
+        def loggerName = names.logger
+        def level = names.level
 
 		log.info "Logger $loggerName set to level $level"
 
@@ -93,7 +89,7 @@ class RuntimeLoggingController {
 
 	private void addCurrentLevelToLoggerMapList(List loggerMapList) {
 		loggerMapList.each {
-			it.name = "${it.name} - ${Logger.getLogger(it.logger).getEffectiveLevel()}"
+			it.name = "${it.name} - ${logAdapterService.getEffectiveLevel(it.logger)}"
 		}
 	}
 
