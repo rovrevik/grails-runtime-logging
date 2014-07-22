@@ -53,32 +53,56 @@ Allows you to change the logging characteristics (e.g. Level) for common parts o
     def doWithApplicationContext = { applicationContext ->
         // TODO Implement post initialization spring config (optional)
         def bean = applicationContext.getBean('logAdapterService')
+
         String loggingFrameworkName = application.config.grails.plugins.runtimelogging.loggingFramework ?: null
 
         if (!bean) {
-            log.error('Could not retrieve logAdapterService bean.')
+            log.error("Plugin ${plugin} Could not retrieve logAdapterService bean.")
         }
         else if (!loggingFrameworkName) {
-            log.error('Could not retrieve logging framework setting. (assuming Log4j)')
-            bean.loggingFramwork = LoggingFramework.LOG4J
+            log.warn("Plugin ${plugin} Could not retrieve logging framework setting. Attempting automatic.")
+            bean.loggingFramwork = LoggingFramework.AUTO
         }
         else {
             try {
                 bean.loggingFramwork = LoggingFramework.valueOf(loggingFrameworkName)
+                log.info("Plugin ${plugin} Resolved logging framework (${loggingFrameworkName}).")
             }
             catch (e) {
-                log.error('logging framework not set. (assuming Log4j)', e)
-                bean.loggingFramwork = LoggingFramework.LOG4J
+                log.warn("Plugin ${plugin} Could not resolve logging framework (${loggingFrameworkName}). Attempting automatic.")
+                bean.loggingFramwork = LoggingFramework.AUTO
             }
         }
 
         if (bean) {
-            try {
-                bean.loggingClasses.logger = Class.forName(bean.loggingFramwork.loggingClassNames.logger)
-                bean.loggingClasses.level = Class.forName(bean.loggingFramwork.loggingClassNames.level)
+            if (bean.loggingFramwork == LoggingFramework.AUTO) {
+                String injectedLogClassName = log.logger.class.name
+                if (injectedLogClassName.contains("GrailsLog4jLoggerAdapter")) {
+                    bean.loggingFramwork = LoggingFramework.LOG4J
+                }
+                else if (injectedLogClassName.equals("ch.qos.logback.classic.Logger")) {
+                    bean.loggingFramwork = LoggingFramework.LOGBACK
+                }
+                else {
+                    log.error("Plugin ${plugin} Logging framework not set. Disabling.")
+                    bean.loggingFramwork = LoggingFramework.DISABLED
+                }
             }
-            catch (e) {
-                log.error("Could not load logging class(es) ${bean.loggingFramwork.loggingClassNames} message: ${e.message}")
+
+            if (bean.loggingFramwork != LoggingFramework.DISABLED) {
+                log.info("Plugin ${plugin} Loading logging framework classes for ${bean.loggingFramwork}.")
+                try {
+                    bean.loggingClasses.logger = Class.forName(bean.loggingFramwork.loggingClassNames.logger)
+                    bean.loggingClasses.level = Class.forName(bean.loggingFramwork.loggingClassNames.level)
+                    log.info("Plugin ${plugin} Logging framework classes loaded. The plugin is happy.")
+                }
+                catch (e) {
+                    log.error("Plugin ${plugin} Could not load logging class(es) ${bean.loggingFramwork.loggingClassNames} message: ${e.class.simpleName}.")
+                    bean.loggingFramwork = LoggingFramework.DISABLED
+                }
+            }
+            else {
+                log.info("Plugin ${plugin} Logging framework is disabled.")
             }
         }
     }

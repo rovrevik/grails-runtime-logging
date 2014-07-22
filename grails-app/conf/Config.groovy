@@ -21,10 +21,12 @@ log4j = {
            'net.sf.ehcache.hibernate'
 
     warn   'org.mortbay.log'
+    trace   'org.codehaus.groovy.grails.plugins.DefaultGrailsPlugin'
 }
 
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
 
-grails.plugins.runtimelogging.loggingFramework="LOGBACK"
+grails.plugins.runtimelogging.loggingFramework="LOG4J"
+
 

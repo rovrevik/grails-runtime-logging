@@ -8,7 +8,7 @@ grails.project.dependency.resolution = {
         // uncomment to disable ehcache
         // excludes 'ehcache'
         // replacing log4j with logback
-        excludes 'grails-plugin-log4j', 'log4j'
+        // excludes 'grails-plugin-log4j', 'log4j'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     legacyResolve true // whether to do a secondary resolve on plugin installation, not advised and here for backwards compatibility
@@ -28,7 +28,7 @@ grails.project.dependency.resolution = {
 
         // runtime 'mysql:mysql-connector-java:5.1.21'
         // should not pull a logging framework in as a dependency
-        compile 'org.grails.plugins:logback:0.3.1'
+        // compile 'org.grails.plugins:logback:0.3.1'
     }
 
     plugins {
