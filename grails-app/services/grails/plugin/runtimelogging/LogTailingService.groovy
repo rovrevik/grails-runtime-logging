@@ -1,4 +1,4 @@
-package grails.runtime.logging
+package grails.plugin.runtimelogging
 
 class LogTailingService {
 
