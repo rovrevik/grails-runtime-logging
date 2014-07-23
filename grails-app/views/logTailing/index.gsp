@@ -57,9 +57,8 @@
 <body>
 
 <input type="button" value="Refresh" onclick="refreshLogContainer();">
-&nbsp;&nbsp;&nbsp;<label for="autoRefresh">Auto-Refresh</label><input id="autoRefresh" type="checkbox" onclick="toggleAutoRefresh();">
-&nbsp;&nbsp;&nbsp;<label for="autoScroll">Auto-Scroll</label><input id="autoScroll" type="checkbox" checked="checked" onclick=""toggleAuthScroll();>
-&nbsp;&nbsp;&nbsp;is scrolled: <span id="isScrolled"></span>
+&nbsp;&nbsp;&nbsp;<label for="autoRefresh">Auto-Refresh</label><input id="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefresh();">
+&nbsp;&nbsp;&nbsp;<label for="autoScroll">Auto-Scroll</label><input id="autoScroll" type="checkbox" checked="checked" onclick="toggleAutoScroll();">
 <hr>
 
 <div id="mainContainer" class="mainContainer clear">
@@ -81,18 +80,13 @@
 
     $(document).ready(function () {
         toggleAutoRefresh();
-
-        //debug
-        setInterval(function() {
-            $("#isScrolled").text(scrolled);
-        }, 100);
     });
 
     function updateScroll() {
         if (!scrolled) {
             var element = document.getElementById("logContainer");
             element.scrollTop = element.scrollHeight;
-            $("#logContainer").css('border-bottom', 'inherit');
+            $("#logContainer").css('border-bottom', '2px solid blue');
         }
     }
 
@@ -113,12 +107,10 @@
         var autoRefreshButton = $("#autoRefresh");
         if (!(autoRefreshButton.attr('checked') === 'undefined')
                 && autoRefreshButton.attr('checked') == "checked") {
-            console.log('running on auto refresh');
             refreshInterval = setInterval(function() { refreshLogContainer(); }, 1000);
         }
         else
         {
-            console.log('no auto refresh');
             clearInterval(refreshInterval);
         }
     }
@@ -141,13 +133,13 @@
         $.ajax({
             type: 'POST',
             dataType: 'JSON',
-            url: '${createLink(controller: 'runtimeLogging', action: 'tail_getLogData')}',
+            url: '${createLink(controller: 'logTailing', action: 'getLogData')}',
             data: { startFromLines: startFromLines},
             success: function (data) {
-                var d = data.log.output;
+                var d = data.log;
                 $('#logContainer').append(d);
                 updateScroll();
-                startFromLines = data.log.lineAt;
+                startFromLines = data.lastLineNumber;
             }
         });
     }

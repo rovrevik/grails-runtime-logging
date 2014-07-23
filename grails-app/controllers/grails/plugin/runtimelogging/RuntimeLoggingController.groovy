@@ -44,8 +44,6 @@ class RuntimeLoggingController {
 		[name: 'Hibernate', logger: 'org.hibernate']
 	]
 
-    def logTailingService
-
 	// By default render the standard "chooser" view
 	def index = {
 		def domainLoggers = buildArtefactLoggerMapList("Domain")
@@ -135,63 +133,5 @@ class RuntimeLoggingController {
 		}
 		return logMapList
 	}
-
-    //
-    // log tailing
-    //
-
-    def tail = {
-        render(view:'tail')
-    }
-
-    def tail_getLogData() {
-        def logData
-        if (params.startFromLines) {
-            logData = getLatestLogItemsByLines(params.startFromLines)
-        }
-        else {
-            logData = getCompleteLog()
-        }
-        def result = [log: logData.output, lastLineNumber: logData.lineAt]
-        render result as JSON
-    }
-
-    public def getLogPaths() {
-        def result = []
-        Logger.getRootLogger().loggerRepository.currentLoggers.each {
-            (it as Logger).allAppenders.each {
-                org.apache.log4j.Appender appender = (it as org.apache.log4j.Appender)
-                def name = appender.name
-                def path = appender.properties.file
-                result.add(name:name, path:path)
-            }
-        }
-        return result
-    }
-
-    public def getCompleteLog() {
-        def allLogPaths = getLogPaths()
-        String path = allLogPaths[0].path
-        def logData = logTailingService.getAll(path)
-        return logData
-    }
-
-    public def getLatestLogItemsByLines(def fromLines) {
-        def allLogPaths = getLogPaths()
-        String path = allLogPaths[0].path
-        def logData = logTailingService.getLastLines(path, fromLines as int)
-        return logData
-    }
-
-    public def getLatestLogItemsByTime(def fromTime) {
-        def allLogPaths = getLogPaths()
-        String path = allLogPaths[0].path
-        def lastModified = new Date(new File(path).lastModified())
-        def logData = ""
-        if ((lastModified > fromTime) || fromTime == null) {
-            logData = logTailingService.getAll(path)
-        }
-        return logData
-    }
 
 }
