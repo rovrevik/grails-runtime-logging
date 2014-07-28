@@ -55,6 +55,10 @@ Allows you to change the logging characteristics (e.g. Level) for common parts o
         def bean = applicationContext.getBean('logAdapterService')
 
         String loggingFrameworkName = application.config.grails.plugins.runtimelogging.loggingFramework ?: null
+        String logTailingAppenderName = application.config.grails.plugins.runtimelogging.logTailingAppenderName ?: null
+
+        def logAdapterService = applicationContext.getBean('logAdapterService')
+        logAdapterService.logTailingAppenderName = logTailingAppenderName
 
         if (!bean) {
             log.error("Plugin ${plugin} Could not retrieve logAdapterService bean.")

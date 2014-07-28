@@ -13,13 +13,13 @@ class LogTailingService {
         return returnValue
     }
 
-    def getAll(filePathAndName, int max = 5000) {
+    def getLog(filePathAndName, int max = 500) {
         def returnValue = [:]
         def output = ''
         int lineCount = countLines(filePathAndName) as int
         if (lineCount > max) {
             // if its over max just get max
-            output = getLastLines(filePathAndName, max).output
+            output = getLastLines(filePathAndName, (lineCount - max)).output
         } else {
             // else get the whole file (that is less than max lines)
             def cmd = ["bash","-c","cat ${filePathAndName}"].execute().text.eachLine { output += '<div>' + it + '</div>' }
